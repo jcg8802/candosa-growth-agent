@@ -125,6 +125,9 @@
   <a href="#slack">Slack</a>
   <a href="#crons">Cron Schedule</a>
   <a href="#llm">LLM Strategy</a>
+  <a href="#landing">Landing Pages</a>
+  <a href="#creative">Ad Creative</a>
+  <a href="#seo">SEO & Content</a>
   <a href="#launch">Launch Plan</a>
 </nav>
 
@@ -226,7 +229,11 @@
     <tr><td>Meta</td><td>Meta Marketing API</td><td>€0</td></tr>
     <tr><td>Analytics</td><td>Google Analytics Data API v1</td><td>€0</td></tr>
     <tr><td>Conversions</td><td>Stripe webhooks + Google Ads Offline Imports</td><td>€0</td></tr>
-    <tr><td style="font-weight:700">TOTAL</td><td style="font-weight:700">All-in infrastructure</td><td style="font-weight:700">~€60-175/month</td></tr>
+    <tr><td>Landing pages</td><td>Webflow or Framer + VWO A/B testing</td><td>€43-72/month</td></tr>
+    <tr><td>Creative tools</td><td>Canva Pro + CapCut + ElevenLabs</td><td>€18/month</td></tr>
+    <tr><td>SEO tools</td><td>Semrush Pro + Surfer SEO + Buffer + ActiveCampaign</td><td>€233/month</td></tr>
+    <tr><td>Blog hosting</td><td>Webflow CMS or Ghost</td><td>€20-36/month</td></tr>
+    <tr><td style="font-weight:700">TOTAL</td><td style="font-weight:700">Full growth stack (excl. ad spend)</td><td style="font-weight:700">~€375-530/month</td></tr>
   </table>
 </section>
 
@@ -705,6 +712,342 @@ openclaw cron add --name "Search Terms Review" \
   </div>
 </section>
 
+<!-- LANDING PAGES -->
+<section id="landing">
+  <h2><span class="step-num">10</span> Landing Pages</h2>
+  <p class="section-intro">Four dedicated landing pages are required before campaigns can go live. Each is purpose-built for a specific campaign and keyword intent. Speed, GCLID capture, and conversion tracking are non-negotiable.</p>
+
+  <h3>Required Pages</h3>
+  <table>
+    <tr><th>URL</th><th>Campaign</th><th>Primary CTA</th><th>Key Message</th></tr>
+    <tr><td>/alta-autonomo</td><td>Alta Autónomo</td><td>Darme de Alta Gratis</td><td>Alta en 24h, asesor incluido, tarifa plana €80/mes SS</td></tr>
+    <tr><td>/iva-trimestral-autonomos</td><td>Gestión Fiscal → IVA</td><td>Presentar mi IVA</td><td>Modelo 303 presentado por nosotros, nunca pierdas un plazo</td></tr>
+    <tr><td>/gestoria-online-autonomos</td><td>Gestión Fiscal → Gestoría</td><td>Ver Planes</td><td>Más barato que tu gestoría, asesor real asignado</td></tr>
+    <tr><td>/cambia-a-candosa</td><td>Competidores</td><td>Cambiar Ahora</td><td>Migración gratis en 24h, 1er mes gratis</td></tr>
+  </table>
+
+  <h3>Tech Recommendation: Webflow or Framer</h3>
+  <div class="card-grid">
+    <div class="card highlight">
+      <div class="card-icon">🎨</div>
+      <h4>Webflow (recommended)</h4>
+      <p>Visual builder with CMS. Team can edit copy without dev. €23/month. Hosts on Webflow CDN or export to Vercel.</p>
+    </div>
+    <div class="card blue-border">
+      <div class="card-icon">⚡</div>
+      <h4>Framer</h4>
+      <p>Faster to build, beautiful animations. Better for modern design. €20/month. Good choice if designer-led.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔧</div>
+      <h4>Custom HTML on Vercel</h4>
+      <p>Most control. Free hosting. Requires dev for every change. Best if you already have a dev workflow.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h4>A/B Testing: VWO</h4>
+      <p>Test headline variants, CTA copy, layout. Start testing after 500+ visits per page. €49/month.</p>
+    </div>
+  </div>
+
+  <h3>Mandatory: GCLID Capture on Every Landing Page</h3>
+  <p>Every landing page must capture the Google Click ID from the URL and store it in a cookie. Without this, conversion attribution is broken and Cleo can't import offline conversions to Google Ads.</p>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">JavaScript — add before &lt;/body&gt; on every landing page</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt">// GCLID capture — required for Google Ads attribution</span>
+<span class="fn">(function</span>() {
+  <span class="kw">const</span> params = <span class="kw">new</span> URLSearchParams(window.location.search);
+  <span class="kw">const</span> gclid = params.get(<span class="str">'gclid'</span>);
+  <span class="kw">if</span> (gclid) {
+    <span class="cmt">// 90-day cookie — covers long consideration cycles</span>
+    document.cookie = <span class="str">'gclid='</span> + gclid + <span class="str">'; max-age=7776000; path=/; SameSite=Lax'</span>;
+    localStorage.setItem(<span class="str">'gclid'</span>, gclid);
+    localStorage.setItem(<span class="str">'gclid_ts'</span>, Date.now());
+  }
+  <span class="cmt">// Also capture UTM params for channel attribution</span>
+  [<span class="str">'utm_source'</span>, <span class="str">'utm_medium'</span>, <span class="str">'utm_campaign'</span>, <span class="str">'utm_content'</span>].forEach(<span class="kw">p</span> => {
+    <span class="kw">const</span> v = params.get(p);
+    <span class="kw">if</span> (v) localStorage.setItem(p, v);
+  });
+<span class="fn">})()</span>;</pre>
+  </div>
+
+  <h3>Hidden Form Field — pass GCLID to backend on signup</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">HTML — add to every signup/lead form</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt">&lt;!-- Hidden fields for attribution —&gt;</span>
+&lt;input type="hidden" name="gclid" id="f_gclid"&gt;
+&lt;input type="hidden" name="utm_source" id="f_utm_source"&gt;
+&lt;input type="hidden" name="utm_campaign" id="f_utm_campaign"&gt;
+
+&lt;script&gt;
+  document.getElementById('f_gclid').value =
+    document.cookie.split('gclid=')[1]?.split(';')[0] ||
+    localStorage.getItem('gclid') || '';
+  document.getElementById('f_utm_source').value = localStorage.getItem('utm_source') || '';
+  document.getElementById('f_utm_campaign').value = localStorage.getItem('utm_campaign') || '';
+&lt;/script&gt;</pre>
+  </div>
+
+  <h3>Performance Requirements (Quality Score impact)</h3>
+  <table>
+    <tr><th>Metric</th><th>Target</th><th>Why it matters</th></tr>
+    <tr><td>Page load time</td><td>&lt;2 seconds</td><td>Every 1s delay = 7% fewer conversions. Also affects Quality Score directly.</td></tr>
+    <tr><td>Mobile score</td><td>&gt;90 (PageSpeed)</td><td>Spain: 70%+ of searches on mobile. Non-negotiable.</td></tr>
+    <tr><td>Keyword match</td><td>H1 + meta title must contain primary keyword</td><td>Google checks LP relevance to ad keyword — affects Quality Score</td></tr>
+    <tr><td>CTA above fold</td><td>Always visible without scrolling</td><td>Conversion rate drops 30-40% when CTA requires scroll</td></tr>
+    <tr><td>HTTPS</td><td>Required</td><td>Google Ads won't serve to HTTP pages</td></tr>
+  </table>
+
+  <h3>Analytics Setup Per Page</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Google Tag Manager — events to fire on each landing page</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt">// GA4 events to configure in GTM:</span>
+<span class="cmt">// 1. page_view — on all pages (auto)</span>
+<span class="cmt">// 2. form_start — when user clicks into the signup form</span>
+<span class="cmt">// 3. form_submit — on form submission (primary conversion)</span>
+<span class="cmt">// 4. scroll_depth — 25%, 50%, 75%, 100%</span>
+<span class="cmt">// 5. click_cta — on primary CTA button click</span>
+
+<span class="cmt">// Google Ads conversion tag — fire on form_submit</span>
+<span class="cmt">// Conversion label: get from Google Ads → Tools → Conversions</span>
+gtag(<span class="str">'event'</span>, <span class="str">'conversion'</span>, {
+  <span class="str">'send_to'</span>: <span class="str">'AW-CONVERSION_ID/CONVERSION_LABEL'</span>,
+  <span class="str">'value'</span>: <span class="num">49.0</span>,  <span class="cmt">// replace with actual plan price</span>
+  <span class="str">'currency'</span>: <span class="str">'EUR'</span>
+});</pre>
+  </div>
+
+  <h3>Tooling Summary</h3>
+  <table>
+    <tr><th>Tool</th><th>Purpose</th><th>Cost</th></tr>
+    <tr><td>Webflow or Framer</td><td>Landing page builder + hosting</td><td>€20-23/month</td></tr>
+    <tr><td>Google Tag Manager</td><td>Tag management (GCLID, GA4, Ads conversion)</td><td>Free</td></tr>
+    <tr><td>Google Analytics 4</td><td>Traffic + event tracking</td><td>Free</td></tr>
+    <tr><td>Microsoft Clarity</td><td>Heatmaps + session recordings (free Hotjar alternative)</td><td>Free</td></tr>
+    <tr><td>VWO</td><td>A/B testing on landing pages</td><td>€49/month</td></tr>
+    <tr><td>PageSpeed Insights</td><td>Page speed monitoring</td><td>Free</td></tr>
+  </table>
+</section>
+
+<!-- AD CREATIVE -->
+<section id="creative">
+  <h2><span class="step-num">11</span> Ad Creative — Static & Video</h2>
+  <p class="section-intro">All campaigns require creative assets across multiple formats and platforms. Production workflow, required sizes, and tooling recommendations for Spanish-market creative.</p>
+
+  <h3>Required Creative Formats</h3>
+
+  <h3 style="color:var(--orange)">Google Ads</h3>
+  <table>
+    <tr><th>Format</th><th>Size / Spec</th><th>Where it shows</th><th>Priority</th></tr>
+    <tr><td>Responsive Search Ads (RSA)</td><td>15 headlines (30 chars) + 4 descriptions (90 chars)</td><td>Google Search results</td><td>🔴 Critical — already built</td></tr>
+    <tr><td>Display — Square</td><td>300×250 px, &lt;150KB</td><td>Google Display Network</td><td>🟡 Medium</td></tr>
+    <tr><td>Display — Leaderboard</td><td>728×90 px, &lt;150KB</td><td>Desktop web banners</td><td>🟡 Medium</td></tr>
+    <tr><td>Display — Large Rectangle</td><td>336×280 px, &lt;150KB</td><td>Google Display Network</td><td>🟡 Medium</td></tr>
+    <tr><td>Display — Wide Skyscraper</td><td>160×600 px, &lt;150KB</td><td>Sidebar placements</td><td>🟢 Low</td></tr>
+    <tr><td>Display — Mobile Banner</td><td>320×50 px, &lt;150KB</td><td>Mobile web</td><td>🟡 Medium</td></tr>
+    <tr><td>Responsive Display Ad</td><td>1 logo + up to 15 images + headlines + descriptions</td><td>Auto-adapts to all Display sizes</td><td>🔴 Critical — replaces all static display</td></tr>
+    <tr><td>YouTube — Skippable In-Stream</td><td>16:9 · min 12s, max 3min · skip after 5s</td><td>Before/during YouTube videos</td><td>🟡 Phase 2</td></tr>
+    <tr><td>YouTube — Bumper Ad</td><td>16:9 · exactly 6 seconds · non-skippable</td><td>Before YouTube videos</td><td>🟡 Phase 2</td></tr>
+    <tr><td>Performance Max assets</td><td>Mix of images, logos, headlines, descriptions, videos</td><td>All Google surfaces</td><td>🟢 Phase 3</td></tr>
+  </table>
+
+  <h3 style="color:var(--blue)">Meta Ads (Facebook + Instagram)</h3>
+  <table>
+    <tr><th>Format</th><th>Size / Spec</th><th>Where it shows</th><th>Priority</th></tr>
+    <tr><td>Static — Feed Square</td><td>1080×1080 px (1:1) · &lt;30MB</td><td>FB + IG feed</td><td>🔴 Critical</td></tr>
+    <tr><td>Static — Feed Portrait</td><td>1080×1350 px (4:5) · &lt;30MB</td><td>FB + IG feed — more screen space</td><td>🔴 Critical</td></tr>
+    <tr><td>Static — Stories / Reels</td><td>1080×1920 px (9:16) · &lt;30MB</td><td>IG Stories, IG Reels, FB Stories</td><td>🔴 Critical</td></tr>
+    <tr><td>Static — Horizontal</td><td>1200×628 px (1.91:1)</td><td>FB link ads in feed</td><td>🟡 Medium</td></tr>
+    <tr><td>Video — Feed</td><td>1:1 or 4:5 · max 60s for feed · H.264 · &lt;4GB</td><td>FB + IG feed</td><td>🟡 Phase 2</td></tr>
+    <tr><td>Video — Reels</td><td>9:16 · 15-60s · first 3s must hook · no letterboxing</td><td>IG Reels, FB Reels</td><td>🔴 High — best organic-to-paid crossover</td></tr>
+    <tr><td>Video — Stories</td><td>9:16 · max 15s · safe zone: keep text away from top/bottom 14%</td><td>IG Stories, FB Stories</td><td>🟡 Phase 2</td></tr>
+    <tr><td>Carousel</td><td>2-10 cards · 1080×1080 px each · individual headlines</td><td>FB + IG feed</td><td>🟡 Phase 2 — good for feature showcase</td></tr>
+  </table>
+
+  <div class="callout orange">
+    <p>⚠️ <strong>Spanish market rule:</strong> All copy must be in Spanish. Never run translated English creative. Hire a native Spanish speaker to review all ad copy before launch — false friends and awkward phrasing kill CTR.</p>
+  </div>
+
+  <h3>Minimum Creative Set for Launch</h3>
+  <div class="card-grid">
+    <div class="card highlight">
+      <div class="card-icon">📐</div>
+      <h4>Static: 6 images</h4>
+      <p>1080×1080, 1080×1350, 1080×1920 × 2 variants (value prop + social proof). Covers all Meta placements.</p>
+    </div>
+    <div class="card highlight">
+      <div class="card-icon">🖼️</div>
+      <h4>Display: Responsive Display Ad</h4>
+      <p>1 set of logo + 5 images + headlines + descriptions. Google auto-adapts to every Display size.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🎬</div>
+      <h4>Video: 1× Reels (30s)</h4>
+      <p>9:16 vertical. Hook in first 3 seconds. "Alta de autónomo en 24h" demo or testimonial. Phase 2.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⏱️</div>
+      <h4>Video: 1× Bumper (6s)</h4>
+      <p>Pure awareness. One strong statement. "Tu gestoría online. Desde €XX/mes." Phase 2.</p>
+    </div>
+  </div>
+
+  <h3>Creative Production Tooling</h3>
+  <table>
+    <tr><th>Tool</th><th>Best For</th><th>Cost</th><th>Recommended?</th></tr>
+    <tr><td><strong>Canva Pro</strong></td><td>Static ads — fast, team-friendly, resize in 1 click</td><td>€13/month</td><td>✅ Yes — start here</td></tr>
+    <tr><td><strong>Figma</strong></td><td>Higher-quality static design, component systems</td><td>€15/month</td><td>✅ If you have a designer</td></tr>
+    <tr><td>Adobe Express</td><td>Quick social graphics, brand kit</td><td>€10/month</td><td>Optional</td></tr>
+    <tr><td><strong>CapCut</strong></td><td>Vertical video editing for Reels/Stories — free, fast</td><td>Free</td><td>✅ Yes for video</td></tr>
+    <tr><td><strong>Descript</strong></td><td>AI video editing, captions, overdub</td><td>€24/month</td><td>✅ Phase 2</td></tr>
+    <tr><td>Lumen5</td><td>Text-to-video for content repurposing</td><td>€29/month</td><td>Optional</td></tr>
+    <tr><td><strong>ElevenLabs</strong></td><td>AI Spanish voiceover for video ads</td><td>€5/month</td><td>✅ Great for video production at scale</td></tr>
+    <tr><td>Pexels / Unsplash</td><td>Stock photos — free, no attribution needed</td><td>Free</td><td>✅ Yes</td></tr>
+    <tr><td>Mixkit</td><td>Free stock video clips</td><td>Free</td><td>✅ Yes</td></tr>
+  </table>
+
+  <h3>Creative Production Workflow</h3>
+  <ol class="step-list">
+    <li><strong>Brief</strong> — Cleo generates creative brief per ad group (audience, hook, CTA, format, key message)</li>
+    <li><strong>Copy</strong> — Spanish copywriter reviews + refines headline and body copy</li>
+    <li><strong>Design</strong> — Designer produces static assets in Canva or Figma; all 3 sizes in one session</li>
+    <li><strong>Video</strong> — Script written first, then shot or assembled from stock in CapCut/Descript</li>
+    <li><strong>Review</strong> — JC or Head of Growth approves via shared Canva or Figma link</li>
+    <li><strong>Upload</strong> — Assets uploaded directly to Meta Ads Manager and Google Ads asset library</li>
+    <li><strong>Test</strong> — Run 2-3 creative variants per ad group for first 30 days, let performance data pick the winner</li>
+  </ol>
+
+  <div class="callout blue">
+    <p>💡 <strong>Creative refresh cadence:</strong> Replace the lowest-performing creative every 4 weeks. Ad fatigue hits fast in a narrow audience. Cleo monitors CTR decline and alerts when a creative needs replacing.</p>
+  </div>
+</section>
+
+<!-- SEO & CONTENT -->
+<section id="seo">
+  <h2><span class="step-num">12</span> SEO & Content Strategy</h2>
+  <p class="section-intro">Paid traffic rents attention. SEO owns it. The goal is to build a content moat around autónomos keywords so Candosa ranks organically for the same terms it pays for — compounding returns over 6-12 months.</p>
+
+  <h3>Hosting Recommendation</h3>
+  <div class="card-grid">
+    <div class="card highlight">
+      <div class="card-icon">🏗️</div>
+      <h4>Option A: Blog on candosa.com</h4>
+      <p>Best for SEO authority. Blog lives on same domain (candosa.com/blog). Use Webflow CMS, WordPress, or Ghost. Domain authority flows to all pages.</p>
+    </div>
+    <div class="card blue-border">
+      <div class="card-icon">⚡</div>
+      <h4>Option B: Ghost Pro</h4>
+      <p>Clean, fast, SEO-optimized CMS. €9/month self-hosted or €36/month managed. Connect to candosa.com/blog via subdirectory proxy.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">❌</div>
+      <h4>Avoid: Subdomain</h4>
+      <p>blog.candosa.com is treated as a separate domain by Google. All content authority is split. Always use subdirectory (/blog).</p>
+    </div>
+  </div>
+
+  <h3>Target Keyword Clusters</h3>
+  <table>
+    <tr><th>Cluster</th><th>Example Keywords</th><th>Monthly Vol (ES)</th><th>Difficulty</th><th>Priority</th></tr>
+    <tr><td>Alta autónomo</td><td>cómo darse de alta autónomo, alta autónomo requisitos</td><td>8,000–15,000</td><td>Medium</td><td>🔴 1st</td></tr>
+    <tr><td>Tarifa plana</td><td>tarifa plana autónomos 2026, cuánto paga un autónomo nuevo</td><td>5,000–12,000</td><td>Medium</td><td>🔴 1st</td></tr>
+    <tr><td>IVA trimestral</td><td>modelo 303 autónomos, cómo presentar el IVA</td><td>10,000–20,000</td><td>Medium-High</td><td>🔴 1st</td></tr>
+    <tr><td>Gestoría online</td><td>mejor gestoría online autónomos, gestoría autónomos precio</td><td>3,000–8,000</td><td>High</td><td>🟡 2nd</td></tr>
+    <tr><td>IRPF autónomos</td><td>modelo 130, pagos fraccionados autónomos</td><td>6,000–14,000</td><td>Medium</td><td>🟡 2nd</td></tr>
+    <tr><td>Comparativas</td><td>declarando vs candosa, alternativa a declarando</td><td>500–2,000</td><td>Low</td><td>🟡 2nd — high intent</td></tr>
+    <tr><td>Herramientas / guías</td><td>calculadora cuota autónomos, simulador tarifa plana</td><td>2,000–8,000</td><td>Low</td><td>🟢 3rd — link magnets</td></tr>
+  </table>
+
+  <h3>Content Calendar Cadence</h3>
+  <table>
+    <tr><th>Frequency</th><th>Content Type</th><th>Format</th><th>Cleo's Role</th></tr>
+    <tr><td>2× per week</td><td>SEO blog posts</td><td>1,500-2,500 words · H1/H2/H3 structured · internal links</td><td>Generate full draft, brief, and meta description</td></tr>
+    <tr><td>1× per week</td><td>LinkedIn post</td><td>Short-form insight or tip for autónomos</td><td>Auto-draft from blog content, post on schedule</td></tr>
+    <tr><td>3× per week</td><td>Instagram / Reels</td><td>Carousel or short video — "¿Sabías que...?" format</td><td>Generate content brief + caption copy</td></tr>
+    <tr><td>1× per month</td><td>Email newsletter</td><td>Top tax tip + quarterly deadline reminder + product update</td><td>Draft full newsletter, schedule in ActiveCampaign</td></tr>
+    <tr><td>1× per quarter</td><td>Deadline guide</td><td>"Guía completa Q1/Q2/Q3/Q4 para autónomos" — evergreen + timely</td><td>Full draft + update prior year's version</td></tr>
+    <tr><td>Ongoing</td><td>Calculadoras / tools</td><td>Interactive: cuota autónomos calculator, simulador IRPF</td><td>Generate requirements + content copy</td></tr>
+  </table>
+
+  <h3>SEO Tooling Stack</h3>
+  <table>
+    <tr><th>Tool</th><th>Purpose</th><th>Cost</th></tr>
+    <tr><td><strong>Semrush</strong> (or Ahrefs)</td><td>Keyword research, competitor analysis, rank tracking</td><td>€120/month (Semrush Pro)</td></tr>
+    <tr><td><strong>Surfer SEO</strong></td><td>Content optimization — tells you exactly what to include to rank</td><td>€59/month</td></tr>
+    <tr><td><strong>Google Search Console</strong></td><td>Rank tracking, index coverage, click data — free + essential</td><td>Free</td></tr>
+    <tr><td><strong>Google Analytics 4</strong></td><td>Content performance, organic traffic by page</td><td>Free</td></tr>
+    <tr><td><strong>Buffer or Hootsuite</strong></td><td>Social media scheduling (LinkedIn, Instagram, Twitter/X)</td><td>€15-€49/month</td></tr>
+    <tr><td><strong>ActiveCampaign</strong></td><td>Email newsletter + lead nurturing sequences</td><td>€39/month</td></tr>
+    <tr><td><strong>Webflow CMS</strong> or Ghost</td><td>Blog hosting on candosa.com/blog</td><td>€20-36/month</td></tr>
+    <tr><td>Screaming Frog</td><td>Technical SEO audit — crawl errors, redirect chains</td><td>€209/year</td></tr>
+  </table>
+
+  <h3>Content Production Workflow (Cleo-assisted)</h3>
+  <ol class="step-list">
+    <li><strong>Keyword brief</strong> — Cleo pulls monthly volume + competition data from Semrush API, identifies content gaps</li>
+    <li><strong>Content brief</strong> — Cleo generates full brief: target keyword, search intent, suggested H1/H2/H3 structure, word count, internal links to add, competitors to outperform</li>
+    <li><strong>Draft</strong> — Human writer (or Cleo for first draft) writes the post following the brief</li>
+    <li><strong>Optimization</strong> — Run draft through Surfer SEO, hit target content score before publishing</li>
+    <li><strong>Review</strong> — Head of Growth approves. Native Spanish review for accuracy + tone.</li>
+    <li><strong>Publish</strong> — Publish to CMS. Cleo verifies it appears in Google Search Console within 48h.</li>
+    <li><strong>Distribute</strong> — Cleo auto-drafts LinkedIn post + IG caption from the article, schedules in Buffer</li>
+    <li><strong>Track</strong> — Cleo monitors ranking weekly, alerts if article drops >5 positions or gets a featured snippet opportunity</li>
+  </ol>
+
+  <h3>Content Calendar Template</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">Weekly content calendar — repeat this pattern</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre>MONDAY
+  📝 Blog post published (pre-written last week)
+  📱 LinkedIn post live (auto-drafted by Cleo)
+  📊 Google Ads weekly report (Cleo posts to Slack)
+
+TUESDAY
+  📸 Instagram carousel posted
+
+WEDNESDAY
+  📝 Blog post #2 of week published
+  📱 LinkedIn post #2
+
+THURSDAY
+  🎬 Instagram Reel posted (filmed/edited previous week)
+
+FRIDAY
+  📊 Search terms review (Cleo posts negative keyword proposals)
+  📅 Next week content briefed and assigned
+
+MONTHLY (1st Monday)
+  📧 Email newsletter sent
+  📊 Monthly SEO rank report (Cleo pulls from Search Console)
+  🔍 Content gap analysis (new opportunities identified)</pre>
+  </div>
+
+  <h3>Quick Wins — Publish These First</h3>
+  <div class="card-grid">
+    <div class="card highlight">
+      <div class="card-icon">🧮</div>
+      <h4>Calculadora Cuota Autónomos 2026</h4>
+      <p>Interactive tool. High search volume, huge link magnet. "¿Cuánto pagaré de autónomo?" — answer it with a calculator.</p>
+    </div>
+    <div class="card highlight">
+      <div class="card-icon">📋</div>
+      <h4>Guía Alta Autónomo 2026</h4>
+      <p>Comprehensive step-by-step. Target: "cómo darse de alta de autónomo". Should rank in 60-90 days.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📅</div>
+      <h4>Calendario Fiscal Autónomos 2026</h4>
+      <p>All deadlines in one place. Evergreen + seasonal traffic spike before each quarter. Easy win.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚔️</div>
+      <h4>Candosa vs Declarando vs TaxDown</h4>
+      <p>Comparison page. High-intent searchers. "declarando alternativa" — they're ready to switch.</p>
+    </div>
+  </div>
+</section>
+
 <!-- LAUNCH PLAN -->
 <section id="launch">
   <h2><span class="step-num">9</span> Launch Plan</h2>
@@ -749,8 +1092,26 @@ openclaw cron add --name "Search Terms Review" \
       <td>Dev team</td>
     </tr>
     <tr>
-      <td><strong>Phase 7</strong><br>Go live</td>
-      <td>Enable Candosa | Alta Autónomo at €200/day · Monitor daily for 7 days · Let Cleo report</td>
+      <td><strong>Phase 7</strong><br>Landing pages</td>
+      <td>Build 4 landing pages (Webflow/Framer) · GCLID capture · GTM setup · GA4 events · PageSpeed &gt;90</td>
+      <td>1-2 weeks</td>
+      <td>Designer + Dev</td>
+    </tr>
+    <tr>
+      <td><strong>Phase 8</strong><br>Creative production</td>
+      <td>Produce 6 static ad images (3 sizes × 2 variants) · 1 Responsive Display Ad set · Brief video for Phase 2</td>
+      <td>1 week</td>
+      <td>Designer</td>
+    </tr>
+    <tr>
+      <td><strong>Phase 9</strong><br>SEO foundation</td>
+      <td>Set up blog on candosa.com/blog · Publish 4 quick-win articles · Set up Buffer + ActiveCampaign · Cleo content calendar live</td>
+      <td>2 weeks</td>
+      <td>Head of Growth + Writer</td>
+    </tr>
+    <tr>
+      <td><strong>Phase 10</strong><br>Go live</td>
+      <td>Enable Alta Autónomo at €200/day · Launch Meta static ads · Cleo monitoring active · Weekly report running</td>
       <td>Ongoing</td>
       <td>Head of Growth</td>
     </tr>
@@ -777,6 +1138,21 @@ openclaw cron add --name "Search Terms Review" \
       <div class="card-icon">✅</div>
       <h4>Offline conversions flowing</h4>
       <p>Stripe → GCLID → Google Ads. True ROAS visible in dashboard.</p>
+    </div>
+    <div class="card highlight">
+      <div class="card-icon">✅</div>
+      <h4>Landing pages live + tracking</h4>
+      <p>4 pages on candosa.com with GCLID capture, GTM, GA4 events, and PageSpeed &gt;90 on mobile.</p>
+    </div>
+    <div class="card highlight">
+      <div class="card-icon">✅</div>
+      <h4>Creative assets produced</h4>
+      <p>6 static images across 3 sizes, 1 Responsive Display Ad set, Meta feed + Stories creative ready.</p>
+    </div>
+    <div class="card highlight">
+      <div class="card-icon">✅</div>
+      <h4>SEO content engine running</h4>
+      <p>Blog live on candosa.com/blog · 2 posts/week publishing · social distribution automated · Cleo tracking rankings weekly.</p>
     </div>
   </div>
 
