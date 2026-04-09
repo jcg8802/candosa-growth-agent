@@ -173,7 +173,7 @@
   </div>
 
   <table>
-    <tr><th>JClaw (personal)</th><th>Candosa Growth Agent (Cleo)</th></tr>
+    <tr><th>JC's Personal AI (separate)</th><th>Candosa Growth Agent (Cleo)</th></tr>
     <tr><td>JC's inbox + calendar</td><td>Google Ads + Meta Ads</td></tr>
     <tr><td>Fundraising intelligence</td><td>Conversion tracking + Stripe</td></tr>
     <tr><td>Personal scheduling</td><td>Weekly growth reports to team</td></tr>
@@ -493,13 +493,13 @@ Measure yourself by ROAS and CAC. That's it.</pre>
 <!-- SKILLS -->
 <section id="skills">
   <h2><span class="step-num">5</span> Skills to Deploy</h2>
-  <p class="section-intro">Copy these skill directories from JClaw's workspace to Cleo's workspace on the VPS.</p>
+  <p class="section-intro">Copy these skill directories into Cleo's workspace on the VPS.</p>
 
   <div class="card-grid">
     <div class="card highlight">
       <div class="card-icon">📊</div>
       <h4>paid-traffic</h4>
-      <p>Already built. Google Ads reports, anomaly detection, weekly ROAS/CAC. Copy directly from JClaw.</p>
+      <p>Already built. Google Ads reports, anomaly detection, weekly ROAS/CAC. See transfer instructions below.</p>
     </div>
     <div class="card blue-border">
       <div class="card-icon">🔄</div>
@@ -528,7 +528,7 @@ Measure yourself by ROAS and CAC. That's it.</pre>
     </div>
   </div>
 
-  <h3>Transfer paid-traffic skill from JClaw → VPS</h3>
+  <h3>Transfer paid-traffic skill to the VPS</h3>
   <div class="code-block">
     <div class="code-header"><span class="code-label">bash — run on your local machine</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
     <pre><span class="cmt"># Copy paid-traffic skill to VPS</span>
@@ -716,13 +716,13 @@ openclaw cron add --name "Search Terms Review" \
       <td><strong>Phase 1</strong><br>Infrastructure</td>
       <td>Provision Hetzner VPS · Install OpenClaw + dependencies · Set up systemd service</td>
       <td>45 min</td>
-      <td>JClaw or JC</td>
+      <td>Tech / DevOps</td>
     </tr>
     <tr>
       <td><strong>Phase 2</strong><br>Config</td>
-      <td>Write config.yaml · Set SOUL.md + USER.md · Transfer paid-traffic skill from JClaw</td>
+      <td>Write config.yaml · Set SOUL.md + USER.md · Upload paid-traffic skill files</td>
       <td>30 min</td>
-      <td>JClaw</td>
+      <td>Tech / DevOps</td>
     </tr>
     <tr>
       <td><strong>Phase 3</strong><br>Slack</td>
@@ -734,13 +734,13 @@ openclaw cron add --name "Search Terms Review" \
       <td><strong>Phase 4</strong><br>Credentials</td>
       <td>Wire Google Ads OAuth · Set up gog auth for candosa accounts · Add Stripe API key</td>
       <td>45 min</td>
-      <td>JClaw</td>
+      <td>Tech / DevOps</td>
     </tr>
     <tr>
       <td><strong>Phase 5</strong><br>Crons</td>
       <td>Set up all scheduled cron jobs · Test each one manually · Verify Slack posting works</td>
       <td>30 min</td>
-      <td>JClaw</td>
+      <td>Tech / DevOps</td>
     </tr>
     <tr>
       <td><strong>Phase 6</strong><br>Conversion tracking</td>
@@ -789,8 +789,8 @@ openclaw cron add --name "Search Terms Review" \
 </div>
 
 <footer>
-  Candosa Growth Agent Build Spec · Prepared by JClaw · April 2026<br>
-  Questions → #📣-paid-traffic on Discord or @JClaw
+  Candosa Growth Agent Build Spec · Candosa Internal · April 2026<br>
+  Questions → JC Glancy
 </footer>
 
 <script>
