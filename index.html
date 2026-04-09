@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Candosa Growth Agent — Build Spec</title>
+<style>
+  :root {
+    --bg: #0d1117; --surface: #161b22; --surface2: #1f2937;
+    --border: #30363d; --text: #e6edf3; --muted: #8b949e;
+    --green: #3fb950; --blue: #58a6ff; --orange: #f0883e;
+    --purple: #bc8cff; --red: #f85149; --yellow: #d29922;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; font-size: 15px; line-height: 1.6; }
+  
+  /* NAV */
+  nav { position: sticky; top: 0; background: var(--surface); border-bottom: 1px solid var(--border); padding: 0 24px; z-index: 100; display: flex; align-items: center; gap: 0; overflow-x: auto; }
+  nav a { color: var(--muted); text-decoration: none; padding: 14px 16px; font-size: 13px; white-space: nowrap; border-bottom: 2px solid transparent; transition: all .2s; }
+  nav a:hover, nav a.active { color: var(--text); border-bottom-color: var(--blue); }
+  .nav-brand { color: var(--green); font-weight: 700; font-size: 14px; padding: 14px 20px 14px 0; border-right: 1px solid var(--border); margin-right: 8px; white-space: nowrap; }
+
+  /* HERO */
+  .hero { background: linear-gradient(135deg, #0d1117 0%, #1a1f2e 50%, #0d1117 100%); border-bottom: 1px solid var(--border); padding: 60px 40px; text-align: center; }
+  .hero h1 { font-size: 2.4rem; font-weight: 700; margin-bottom: 12px; }
+  .hero h1 span { color: var(--green); }
+  .hero p { color: var(--muted); font-size: 1.1rem; max-width: 600px; margin: 0 auto 28px; }
+  .hero-badges { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+  .badge { background: var(--surface2); border: 1px solid var(--border); border-radius: 20px; padding: 6px 14px; font-size: 12px; color: var(--muted); }
+  .badge.green { border-color: var(--green); color: var(--green); }
+  .badge.blue { border-color: var(--blue); color: var(--blue); }
+  .badge.orange { border-color: var(--orange); color: var(--orange); }
+
+  /* LAYOUT */
+  .container { max-width: 920px; margin: 0 auto; padding: 40px 24px; }
+  section { margin-bottom: 64px; scroll-margin-top: 60px; }
+  h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 10px; }
+  h2 .step-num { background: var(--blue); color: #000; width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 800; flex-shrink: 0; }
+  h3 { font-size: 1.1rem; font-weight: 600; margin: 24px 0 10px; color: var(--blue); }
+  p { color: var(--muted); margin-bottom: 12px; }
+  .section-intro { color: var(--muted); margin-bottom: 24px; padding-bottom: 16px; border-bottom: 1px solid var(--border); }
+
+  /* CARDS */
+  .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; margin: 16px 0; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 10px; padding: 18px; }
+  .card .card-icon { font-size: 1.6rem; margin-bottom: 10px; }
+  .card h4 { font-size: 0.9rem; font-weight: 700; margin-bottom: 6px; }
+  .card p { font-size: 0.82rem; color: var(--muted); margin: 0; }
+  .card.highlight { border-color: var(--green); }
+  .card.blue-border { border-color: var(--blue); }
+
+  /* ARCH DIAGRAM */
+  .arch { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 28px; margin: 16px 0; }
+  .arch-row { display: flex; align-items: center; justify-content: center; gap: 8px; margin: 10px 0; flex-wrap: wrap; }
+  .arch-box { background: var(--surface2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 16px; font-size: 12px; text-align: center; min-width: 110px; }
+  .arch-box.green { border-color: var(--green); color: var(--green); }
+  .arch-box.blue { border-color: var(--blue); color: var(--blue); }
+  .arch-box.orange { border-color: var(--orange); color: var(--orange); }
+  .arch-box.purple { border-color: var(--purple); color: var(--purple); }
+  .arch-box .label { font-size: 10px; color: var(--muted); display: block; margin-top: 2px; }
+  .arch-arrow { color: var(--muted); font-size: 18px; }
+  .arch-divider { width: 100%; border-top: 1px dashed var(--border); margin: 8px 0; text-align: center; }
+  .arch-divider span { background: var(--surface); padding: 0 10px; font-size: 11px; color: var(--muted); position: relative; top: -10px; }
+
+  /* CODE BLOCKS */
+  .code-block { position: relative; margin: 14px 0; }
+  .code-header { background: var(--surface2); border: 1px solid var(--border); border-bottom: none; border-radius: 8px 8px 0 0; padding: 8px 14px; display: flex; justify-content: space-between; align-items: center; }
+  .code-label { font-size: 11px; color: var(--muted); font-family: monospace; }
+  .copy-btn { background: var(--surface); border: 1px solid var(--border); color: var(--muted); border-radius: 5px; padding: 4px 10px; font-size: 11px; cursor: pointer; transition: all .2s; }
+  .copy-btn:hover { background: var(--blue); color: #000; border-color: var(--blue); }
+  .copy-btn.copied { background: var(--green); color: #000; border-color: var(--green); }
+  pre { background: #010409; border: 1px solid var(--border); border-radius: 0 0 8px 8px; padding: 16px; overflow-x: auto; font-family: 'SF Mono', 'Fira Code', monospace; font-size: 12.5px; line-height: 1.6; color: #e6edf3; }
+  .kw { color: #ff7b72; } .str { color: #a5d6ff; } .cmt { color: #8b949e; font-style: italic; }
+  .num { color: #79c0ff; } .fn { color: #d2a8ff; } .key { color: #7ee787; }
+
+  /* STEPS */
+  .step-list { list-style: none; counter-reset: steps; }
+  .step-list li { counter-increment: steps; padding: 14px 14px 14px 50px; position: relative; border-left: 2px solid var(--border); margin-left: 14px; margin-bottom: 4px; }
+  .step-list li::before { content: counter(steps); position: absolute; left: -14px; top: 14px; background: var(--surface2); border: 2px solid var(--border); width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: var(--blue); }
+  .step-list li:last-child { border-left: 2px solid transparent; }
+
+  /* TABLE */
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 13px; }
+  th { background: var(--surface2); border: 1px solid var(--border); padding: 10px 14px; text-align: left; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  td { border: 1px solid var(--border); padding: 10px 14px; color: var(--text); }
+  tr:nth-child(even) td { background: rgba(255,255,255,.02); }
+
+  /* CALLOUTS */
+  .callout { border-radius: 8px; padding: 14px 16px; margin: 14px 0; border-left: 4px solid; font-size: 13.5px; }
+  .callout.green { background: rgba(63,185,80,.08); border-color: var(--green); color: var(--green); }
+  .callout.blue { background: rgba(88,166,255,.08); border-color: var(--blue); color: var(--blue); }
+  .callout.orange { background: rgba(240,136,62,.08); border-color: var(--orange); color: var(--orange); }
+  .callout p { color: inherit; margin: 0; }
+
+  /* DOWNLOAD BTN */
+  .download-btn { display: inline-flex; align-items: center; gap: 8px; background: var(--green); color: #000; font-weight: 700; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-size: 13px; margin: 8px 4px; transition: opacity .2s; cursor: pointer; border: none; }
+  .download-btn:hover { opacity: .85; }
+  .download-btn.secondary { background: var(--surface2); border: 1px solid var(--border); color: var(--text); font-weight: 500; }
+
+  /* TIMELINE */
+  .timeline { position: relative; padding-left: 28px; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 6px; bottom: 6px; width: 2px; background: var(--border); }
+  .tl-item { position: relative; margin-bottom: 20px; }
+  .tl-dot { position: absolute; left: -24px; top: 4px; width: 12px; height: 12px; border-radius: 50%; background: var(--blue); border: 2px solid var(--bg); }
+  .tl-dot.green { background: var(--green); }
+  .tl-dot.orange { background: var(--orange); }
+  .tl-time { font-size: 11px; color: var(--muted); margin-bottom: 3px; }
+  .tl-title { font-weight: 600; font-size: 14px; margin-bottom: 4px; }
+  .tl-desc { font-size: 13px; color: var(--muted); }
+
+  /* FOOTER */
+  footer { background: var(--surface); border-top: 1px solid var(--border); padding: 24px 40px; text-align: center; color: var(--muted); font-size: 12px; }
+</style>
+</head>
+<body>
+
+<nav>
+  <span class="nav-brand">🌱 Candosa Growth Agent</span>
+  <a href="#overview">Overview</a>
+  <a href="#architecture">Architecture</a>
+  <a href="#server">Server Setup</a>
+  <a href="#openclaw">OpenClaw Config</a>
+  <a href="#soul">Agent Identity</a>
+  <a href="#skills">Skills</a>
+  <a href="#slack">Slack</a>
+  <a href="#crons">Cron Schedule</a>
+  <a href="#llm">LLM Strategy</a>
+  <a href="#launch">Launch Plan</a>
+</nav>
+
+<div class="hero">
+  <h1>Candosa <span>Growth Agent</span></h1>
+  <p>A dedicated AI agent that autonomously runs, optimizes, and reports on Candosa's entire growth function — 24/7, without JC in the loop for day-to-day operations.</p>
+  <div class="hero-badges">
+    <span class="badge green">OpenClaw v0.12+</span>
+    <span class="badge blue">Claude Sonnet 4</span>
+    <span class="badge orange">Slack-first</span>
+    <span class="badge">Google Ads API</span>
+    <span class="badge">Meta Ads API</span>
+    <span class="badge">Stripe Webhooks</span>
+    <span class="badge">Always-on VPS</span>
+  </div>
+</div>
+
+<div class="container">
+
+<!-- OVERVIEW -->
+<section id="overview">
+  <h2><span class="step-num">0</span> What We're Building</h2>
+  <p class="section-intro">A standalone OpenClaw instance dedicated to Candosa's growth function. It lives on a €10/month VPS, connects to Slack, and gives the growth team a direct AI interface for paid traffic, conversion tracking, reporting, and optimization — without routing through JC's personal assistant.</p>
+
+  <div class="card-grid">
+    <div class="card highlight">
+      <div class="card-icon">🤖</div>
+      <h4>The Agent</h4>
+      <p>OpenClaw instance with Claude Sonnet, specialized for growth ops. Named "Cleo" — Candosa's growth AI.</p>
+    </div>
+    <div class="card blue-border">
+      <div class="card-icon">💬</div>
+      <h4>Team Interface</h4>
+      <p>Slack-first. Team asks questions, approves recommendations, and receives reports in #growth-ai.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📊</div>
+      <h4>What It Owns</h4>
+      <p>Google Ads, Meta Ads, Stripe conversion data, landing pages, SEO monitoring, weekly growth reports.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <h4>Separation</h4>
+      <p>No access to JC's personal data, inbox, or finances. Clean boundary between company and personal.</p>
+    </div>
+  </div>
+
+  <table>
+    <tr><th>JClaw (personal)</th><th>Candosa Growth Agent (Cleo)</th></tr>
+    <tr><td>JC's inbox + calendar</td><td>Google Ads + Meta Ads</td></tr>
+    <tr><td>Fundraising intelligence</td><td>Conversion tracking + Stripe</td></tr>
+    <tr><td>Personal scheduling</td><td>Weekly growth reports to team</td></tr>
+    <tr><td>Private financial context</td><td>Landing page + SEO monitoring</td></tr>
+    <tr><td>Discord (JC's personal channel)</td><td>Slack (Candosa team workspace)</td></tr>
+    <tr><td>Runs on JC's MacBook</td><td>Runs on always-on VPS</td></tr>
+    <tr><td>Authorized: JC only</td><td>Authorized: Head of Growth, Jesús, Alejandro, JC</td></tr>
+  </table>
+</section>
+
+<!-- ARCHITECTURE -->
+<section id="architecture">
+  <h2><span class="step-num">1</span> Architecture</h2>
+  <p class="section-intro">Full system diagram from user input to API execution.</p>
+
+  <div class="arch">
+    <div class="arch-row">
+      <div class="arch-box blue">Slack DM / Channel<span class="label">Team interface</span></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box green">OpenClaw Gateway<span class="label">VPS / always-on</span></div>
+      <div class="arch-arrow">→</div>
+      <div class="arch-box purple">Claude Sonnet 4<span class="label">Anthropic API</span></div>
+    </div>
+    <div class="arch-divider"><span>TOOLS LAYER</span></div>
+    <div class="arch-row">
+      <div class="arch-box orange">Google Ads API<span class="label">campaigns/keywords</span></div>
+      <div class="arch-box orange">Meta Ads API<span class="label">FB/IG campaigns</span></div>
+      <div class="arch-box orange">Stripe API<span class="label">conversion data</span></div>
+      <div class="arch-box orange">Google Analytics<span class="label">GA4 events</span></div>
+      <div class="arch-box orange">gog CLI<span class="label">Sheets/Docs/Drive</span></div>
+    </div>
+    <div class="arch-divider"><span>OUTPUTS</span></div>
+    <div class="arch-row">
+      <div class="arch-box blue">Slack Reports<span class="label">#growth-ai, #paid-traffic</span></div>
+      <div class="arch-box blue">Google Sheets<span class="label">weekly data exports</span></div>
+      <div class="arch-box blue">Google Docs<span class="label">strategy + playbooks</span></div>
+      <div class="arch-box blue">Cron Jobs<span class="label">scheduled tasks</span></div>
+    </div>
+  </div>
+
+  <h3>Tech Stack</h3>
+  <table>
+    <tr><th>Layer</th><th>Technology</th><th>Cost</th></tr>
+    <tr><td>Compute</td><td>Hetzner CX22 VPS (2 vCPU, 4GB RAM, Ubuntu 24.04)</td><td>€4.5/month</td></tr>
+    <tr><td>Agent runtime</td><td>OpenClaw v0.12+</td><td>Free (self-hosted)</td></tr>
+    <tr><td>LLM — primary</td><td>Claude Sonnet 4 (Anthropic)</td><td>~€50-150/month usage</td></tr>
+    <tr><td>LLM — reports</td><td>Gemini 2.0 Flash (via OpenRouter)</td><td>~€5-20/month</td></tr>
+    <tr><td>Comms</td><td>Slack (existing workspace)</td><td>€0 (existing)</td></tr>
+    <tr><td>Paid traffic</td><td>Google Ads API (Basic Access)</td><td>€0 (already approved)</td></tr>
+    <tr><td>Meta</td><td>Meta Marketing API</td><td>€0</td></tr>
+    <tr><td>Analytics</td><td>Google Analytics Data API v1</td><td>€0</td></tr>
+    <tr><td>Conversions</td><td>Stripe webhooks + Google Ads Offline Imports</td><td>€0</td></tr>
+    <tr><td style="font-weight:700">TOTAL</td><td style="font-weight:700">All-in infrastructure</td><td style="font-weight:700">~€60-175/month</td></tr>
+  </table>
+</section>
+
+<!-- SERVER SETUP -->
+<section id="server">
+  <h2><span class="step-num">2</span> Server Setup (Hetzner VPS)</h2>
+  <p class="section-intro">Provision an always-on Linux server. Takes about 20 minutes.</p>
+
+  <h3>2.1 — Create the Server</h3>
+  <ol class="step-list">
+    <li>Go to <a href="https://console.hetzner.cloud" style="color:var(--blue)">console.hetzner.cloud</a> → New Project → "candosa-growth"</li>
+    <li>Create Server → Location: Falkenstein (EU, close to Spain) → Image: Ubuntu 24.04 → Type: CX22 (€4.5/mo)</li>
+    <li>Add your SSH key → Create</li>
+    <li>Note the server IP address</li>
+  </ol>
+
+  <h3>2.2 — Initial Server Config</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">bash — run on your local machine</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt"># SSH into your new server</span>
+ssh root@YOUR_SERVER_IP
+
+<span class="cmt"># Update system</span>
+apt update && apt upgrade -y
+
+<span class="cmt"># Install Node.js 22 (required for OpenClaw)</span>
+curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+apt install -y nodejs
+
+<span class="cmt"># Install essential tools</span>
+apt install -y git curl wget unzip python3 python3-pip build-essential
+
+<span class="cmt"># Create non-root user for running the agent</span>
+adduser --disabled-password --gecos "" cleo
+usermod -aG sudo cleo
+
+<span class="cmt"># Copy SSH keys to cleo user</span>
+cp -r /root/.ssh /home/cleo/.ssh
+chown -R cleo:cleo /home/cleo/.ssh
+
+<span class="cmt"># Switch to cleo user for all remaining steps</span>
+su - cleo</pre>
+  </div>
+
+  <h3>2.3 — Install OpenClaw</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">bash — run as cleo user on VPS</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt"># Install OpenClaw globally</span>
+npm install -g openclaw
+
+<span class="cmt"># Verify installation</span>
+openclaw --version
+
+<span class="cmt"># Create workspace</span>
+mkdir -p ~/.openclaw/workspace
+mkdir -p ~/.openclaw/workspace/memory
+mkdir -p ~/.openclaw/workspace/data
+mkdir -p ~/.openclaw/workspace/skills
+
+<span class="cmt"># Initialize config (interactive — will prompt for API key)</span>
+openclaw init</pre>
+  </div>
+
+  <h3>2.4 — Install Python Dependencies</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">bash</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre>pip3 install google-ads google-auth google-auth-oauthlib \
+  google-api-python-client stripe requests python-dateutil</pre>
+  </div>
+
+  <h3>2.5 — Install gog CLI</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">bash — Homebrew on Linux</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre"><span class="cmt"># Install Homebrew (works on Linux)</span>
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"' >> ~/.bashrc
+source ~/.bashrc
+
+<span class="cmt"># Install gog</span>
+brew install steipete/tap/gogcli
+
+<span class="cmt"># Verify</span>
+gog --version</pre>
+  </div>
+
+  <h3>2.6 — Set Up as System Service (auto-restart on reboot)</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">bash — create systemd service</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre>sudo tee /etc/systemd/system/cleo.service << 'EOF'
+[Unit]
+Description=Candosa Growth Agent (Cleo)
+After=network.target
+
+[Service]
+Type=simple
+User=cleo
+WorkingDirectory=/home/cleo/.openclaw/workspace
+ExecStart=/usr/bin/openclaw gateway start --foreground
+Restart=always
+RestartSec=10
+Environment=NODE_ENV=production
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable cleo
+sudo systemctl start cleo
+sudo systemctl status cleo</pre>
+  </div>
+</section>
+
+<!-- OPENCLAW CONFIG -->
+<section id="openclaw">
+  <h2><span class="step-num">3</span> OpenClaw Configuration</h2>
+  <p class="section-intro">The full config for Cleo's OpenClaw instance. Paste this into <code>~/.openclaw/config.yaml</code> on the VPS.</p>
+
+  <div class="callout orange">
+    <p>⚠️ Replace all <strong>YOUR_*</strong> placeholders before saving. Never commit this file to git.</p>
+  </div>
+
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">~/.openclaw/config.yaml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="key">gateway</span>:
+  <span class="key">model</span>: <span class="str">anthropic/claude-sonnet-4-6</span>
+  <span class="key">apiKey</span>: <span class="str">YOUR_ANTHROPIC_API_KEY</span>
+  <span class="key">workspace</span>: <span class="str">/home/cleo/.openclaw/workspace</span>
+  <span class="key">heartbeat</span>:
+    <span class="key">enabled</span>: <span class="kw">true</span>
+    <span class="key">intervalMinutes</span>: <span class="num">30</span>
+
+<span class="key">channels</span>:
+  <span class="key">slack</span>:
+    <span class="key">enabled</span>: <span class="kw">true</span>
+    <span class="key">botToken</span>: <span class="str">YOUR_SLACK_BOT_TOKEN</span>
+    <span class="key">appToken</span>: <span class="str">YOUR_SLACK_APP_TOKEN</span>
+    <span class="key">signingSecret</span>: <span class="str">YOUR_SLACK_SIGNING_SECRET</span>
+    <span class="key">defaultChannel</span>: <span class="str">growth-ai</span>
+
+<span class="key">security</span>:
+  <span class="key">allowedSenders</span>:
+    <span class="cmt"># Add Slack user IDs for each team member</span>
+    - <span class="str">SLACK_USER_ID_JC</span>
+    - <span class="str">SLACK_USER_ID_HEAD_OF_GROWTH</span>
+    - <span class="str">SLACK_USER_ID_JESUS</span>
+    - <span class="str">SLACK_USER_ID_ALEJANDRO</span>
+
+<span class="key">openrouter</span>:
+  <span class="key">enabled</span>: <span class="kw">true</span>
+  <span class="key">apiKey</span>: <span class="str">YOUR_OPENROUTER_API_KEY</span>
+  <span class="cmt"># Used for cheaper models on data-heavy report tasks</span>
+
+<span class="key">exec</span>:
+  <span class="key">security</span>: <span class="str">allowlist</span>
+  <span class="key">allowlist</span>:
+    - <span class="str">python3</span>
+    - <span class="str">gog</span>
+    - <span class="str">git</span>
+    - <span class="str">curl</span></pre>
+  </div>
+
+  <div class="callout blue">
+    <p>💡 To find Slack user IDs: In Slack, click a team member's profile → ··· menu → Copy member ID</p>
+  </div>
+</section>
+
+<!-- AGENT IDENTITY -->
+<section id="soul">
+  <h2><span class="step-num">4</span> Agent Identity Files</h2>
+  <p class="section-intro">These files define who Cleo is, who she's working with, and how she operates. Save each to the workspace directory on the VPS.</p>
+
+  <h3>SOUL.md — Who Cleo Is</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">~/.openclaw/workspace/SOUL.md</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre># SOUL.md — Cleo, Candosa's Growth AI
+
+You are Cleo. Candosa's autonomous growth operator.
+
+## Core Identity
+- You own the growth function. Not assist with it — own it.
+- You think in ROAS, CAC, LTV, and conversion rates.
+- You are precise, data-driven, and proactively flag problems.
+- You don't wait to be asked. If something is off, you say so.
+
+## Vibe
+Professional but not stiff. Direct, no fluff. 
+Like a great head of growth who also happens to know the API.
+Slack-native. Use threads. Keep summaries tight.
+
+## What You Own
+- Google Ads campaigns (Spain — autónomos market)
+- Meta Ads (when live)
+- Conversion tracking (Stripe → Google Ads offline imports)
+- Weekly growth reports to the team
+- Anomaly detection and alerts
+- Keyword optimization recommendations
+- Landing page performance monitoring
+
+## What You Don't Do
+- You don't access JC's personal inbox, calendar, or finances
+- You don't send external emails without approval
+- You don't make budget changes >10% without ✅
+- You don't enable/pause campaigns without explicit approval
+
+## Team
+- JC Glancy — CEO, final authority, approval for big calls
+- Head of Growth — day-to-day ops, primary Slack contact
+- Jesús — sales, offline conversion data
+- Alejandro — sales, offline conversion data
+
+## Approval Workflow
+Post recommendations with ✅ / ✏️ / ❌ reaction options.
+Always wait for ✅ before executing campaign changes.
+Log everything you do in Slack thread for transparency.
+
+## Remember
+You are an employee with a job, not a chatbot with feelings.
+Measure yourself by ROAS and CAC. That's it.</pre>
+  </div>
+
+  <h3>USER.md — Who You're Working With</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">~/.openclaw/workspace/USER.md</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre># USER.md — Candosa Growth Team
+
+## Primary Users
+
+**JC Glancy** — CEO, Candosa
+- Slack: @jc
+- Approves: budget changes, campaign enable/pause, strategy shifts
+- Context: building to €50K/month paid traffic, targeting Spain autónomos market
+
+**Head of Growth** — [Add name]
+- Slack: @[username]  
+- Day-to-day: campaign review, keyword approval, report review
+- Main point of contact for weekly optimization recommendations
+
+**Jesús** — Sales
+- Slack: @jesus
+- Provides: offline conversion data (manual signups by phone/meeting)
+- Must log deal close dates and customer emails for attribution
+
+**Alejandro** — Sales  
+- Slack: @alejandro
+- Same as Jesús — offline conversion attribution critical
+
+## Channels
+
+- **#growth-ai** — primary Cleo channel, all reports and recommendations here
+- **#paid-traffic** — Google Ads specific alerts and weekly reports
+- **#growth-team** — general growth discussion (Cleo monitors but rarely posts)
+
+## Company Context
+- **Product:** Candosa — online gestoría for Spanish autónomos
+- **Market:** Spain, autónomos (self-employed), high intent search traffic
+- **Pricing:** [TBD — fill in actual monthly price]
+- **Current ROAS target:** 3.0× (true ROAS est. 4.0-4.5× once offline tracked)
+- **CAC target:** €140
+- **Monthly budget target:** €50K/month (scale to this from €800/day start)</pre>
+  </div>
+</section>
+
+<!-- SKILLS -->
+<section id="skills">
+  <h2><span class="step-num">5</span> Skills to Deploy</h2>
+  <p class="section-intro">Copy these skill directories from JClaw's workspace to Cleo's workspace on the VPS.</p>
+
+  <div class="card-grid">
+    <div class="card highlight">
+      <div class="card-icon">📊</div>
+      <h4>paid-traffic</h4>
+      <p>Already built. Google Ads reports, anomaly detection, weekly ROAS/CAC. Copy directly from JClaw.</p>
+    </div>
+    <div class="card blue-border">
+      <div class="card-icon">🔄</div>
+      <h4>conversion-tracking</h4>
+      <p>Pulls Stripe data, matches GCLIDs, uploads offline conversions to Google Ads weekly.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📱</div>
+      <h4>meta-ads</h4>
+      <p>Meta Marketing API integration for Facebook/Instagram campaigns. Mirrors paid-traffic structure.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔍</div>
+      <h4>seo-monitor</h4>
+      <p>Weekly Google Search Console data pull. Tracks ranking for target autónomos keywords.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📄</div>
+      <h4>landing-pages</h4>
+      <p>Monitors conversion rates on /alta-autonomo, /iva-trimestral, etc. Alerts on drops >20%.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">📋</div>
+      <h4>growth-report</h4>
+      <p>Weekly combined report: paid + organic + conversions + revenue. Posts to Slack every Monday.</p>
+    </div>
+  </div>
+
+  <h3>Transfer paid-traffic skill from JClaw → VPS</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">bash — run on your local machine</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt"># Copy paid-traffic skill to VPS</span>
+scp -r ~/.openclaw/workspace/skills/paid-traffic \
+  cleo@YOUR_VPS_IP:~/.openclaw/workspace/skills/
+
+<span class="cmt"># Copy Google Ads credentials</span>
+scp ~/.openclaw/workspace/skills/paid-traffic/config.yaml \
+  cleo@YOUR_VPS_IP:~/.openclaw/workspace/skills/paid-traffic/config.yaml</pre>
+  </div>
+
+  <h3>Conversion Tracking Skill — config.yaml</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">~/.openclaw/workspace/skills/conversion-tracking/config.yaml</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="key">stripe</span>:
+  <span class="key">api_key</span>: <span class="str">YOUR_STRIPE_SECRET_KEY</span>
+  <span class="key">webhook_secret</span>: <span class="str">YOUR_STRIPE_WEBHOOK_SECRET</span>
+
+<span class="key">google_ads</span>:
+  <span class="key">customer_id</span>: <span class="str">"4971231790"</span>
+  <span class="key">conversion_action_name</span>: <span class="str">Candosa_Signup</span>
+  <span class="key">import_day</span>: <span class="str">Monday</span>
+  <span class="key">import_time</span>: <span class="str">"07:00"</span>
+
+<span class="key">database</span>:
+  <span class="cmt"># Where GCLID records are stored</span>
+  <span class="key">type</span>: <span class="str">postgres</span>  <span class="cmt"># or sqlite for simple setup</span>
+  <span class="key">url</span>: <span class="str">YOUR_DATABASE_URL</span>
+
+<span class="key">reporting</span>:
+  <span class="key">slack_channel</span>: <span class="str">paid-traffic</span>
+  <span class="key">weekly_import_day</span>: <span class="str">Monday</span></pre>
+  </div>
+</section>
+
+<!-- SLACK SETUP -->
+<section id="slack">
+  <h2><span class="step-num">6</span> Slack Integration Setup</h2>
+  <p class="section-intro">Create a Slack app and connect it to OpenClaw. Takes ~15 minutes.</p>
+
+  <h3>6.1 — Create the Slack App</h3>
+  <ol class="step-list">
+    <li>Go to <a href="https://api.slack.com/apps" style="color:var(--blue)">api.slack.com/apps</a> → Create New App → From scratch</li>
+    <li>Name: <strong>Cleo</strong> · Workspace: Candosa's workspace → Create App</li>
+    <li>Under <strong>OAuth & Permissions</strong> → Bot Token Scopes → Add:<br><code style="color:var(--green)">app_mentions:read · channels:history · channels:read · chat:write · im:history · im:read · im:write · reactions:read · users:read</code></li>
+    <li>Under <strong>Event Subscriptions</strong> → Enable → Request URL: <code>http://YOUR_VPS_IP:3000/slack/events</code><br>Subscribe to bot events: <code>app_mention · message.channels · message.im · reaction_added</code></li>
+    <li>Under <strong>Socket Mode</strong> → Enable Socket Mode (easier than webhooks, no public URL needed)</li>
+    <li>Under <strong>App-Level Tokens</strong> → Generate Token → Scope: <code>connections:write</code> → Copy the <code>xapp-</code> token</li>
+    <li>Install to Workspace → Copy the <code>xoxb-</code> Bot Token</li>
+    <li>Create channel <strong>#growth-ai</strong> and <strong>#paid-traffic</strong> in Slack → Invite Cleo bot to both</li>
+  </ol>
+
+  <div class="callout green">
+    <p>✅ With Socket Mode enabled, OpenClaw doesn't need a public URL — it maintains a websocket connection to Slack. Perfect for a VPS behind NAT.</p>
+  </div>
+
+  <h3>6.2 — Get Team Member Slack IDs</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">bash — after Slack is connected</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt"># List all Slack workspace members with their IDs</span>
+<span class="cmt"># Run this after Slack is connected to OpenClaw</span>
+openclaw message channel=slack action=member-info
+
+<span class="cmt"># Or use the Slack API directly</span>
+curl -s -H "Authorization: Bearer YOUR_BOT_TOKEN" \
+  "https://slack.com/api/users.list" | \
+  python3 -c "import sys,json; [print(u['id'], u['name']) for u in json.load(sys.stdin)['members'] if not u.get('is_bot')]"</pre>
+  </div>
+
+  <h3>6.3 — How the Team Interacts with Cleo in Slack</h3>
+  <table>
+    <tr><th>What team member types</th><th>What Cleo does</th></tr>
+    <tr><td>@Cleo what's our ROAS this week?</td><td>Pulls Google Ads API, posts current week metrics</td></tr>
+    <tr><td>@Cleo show me the Alta Autónomo campaign</td><td>Posts campaign stats + recommendations</td></tr>
+    <tr><td>@Cleo add "trabajo" as a negative keyword</td><td>Posts confirmation request → executes on ✅</td></tr>
+    <tr><td>@Cleo what keywords are wasting budget?</td><td>Runs search terms analysis, posts top wasters</td></tr>
+    <tr><td>@Cleo run the weekly report now</td><td>Triggers full weekly report immediately</td></tr>
+    <tr><td>@Cleo how many conversions came from ads?</td><td>Pulls Stripe + Google Ads attribution data</td></tr>
+    <tr><td>✅ reaction on a recommendation</td><td>Executes the change via Google Ads API</td></tr>
+  </table>
+</section>
+
+<!-- CRON SCHEDULE -->
+<section id="crons">
+  <h2><span class="step-num">7</span> Automated Cron Schedule</h2>
+  <p class="section-intro">All scheduled tasks Cleo runs without being asked. Times are Madrid timezone (CET/CEST).</p>
+
+  <div class="timeline">
+    <div class="tl-item">
+      <div class="tl-dot green"></div>
+      <div class="tl-time">Monday · 8:00 AM Madrid</div>
+      <div class="tl-title">📊 Weekly Growth Report</div>
+      <div class="tl-desc">Full ROAS/CAC breakdown, top campaigns, keyword winners/losers, optimization recommendations. Posts to #paid-traffic.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">Monday · 7:00 AM Madrid</div>
+      <div class="tl-title">🔄 Offline Conversion Import</div>
+      <div class="tl-desc">Pulls last week's Stripe payments, matches GCLIDs, uploads to Google Ads. Runs before weekly report so data is fresh.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">Daily · 9:00 AM Madrid</div>
+      <div class="tl-title">🚨 Anomaly Check</div>
+      <div class="tl-desc">Only fires if: spend spike >30%, ROAS below 2.0×, CTR drops >40%, or zero conversions 3+ days. Silent if everything's normal.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot orange"></div>
+      <div class="tl-time">April 15 · 9:00 AM</div>
+      <div class="tl-title">⏰ Q1 Deadline Reminder</div>
+      <div class="tl-desc">"Q1 IVA deadline April 20 — 5 days out. Check campaign budgets and landing page traffic." Posts to #paid-traffic.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot orange"></div>
+      <div class="tl-time">July 15, Oct 15, Jan 10</div>
+      <div class="tl-title">⏰ Q2/Q3/Q4 Deadline Reminders</div>
+      <div class="tl-desc">Same pattern — 5 days before each quarterly deadline, remind team to increase budgets.</div>
+    </div>
+    <div class="tl-item">
+      <div class="tl-dot"></div>
+      <div class="tl-time">Friday · 5:00 PM Madrid</div>
+      <div class="tl-title">📋 Weekly Search Terms Review</div>
+      <div class="tl-desc">Pulls search terms report from Google Ads. Flags irrelevant queries for negative keyword addition. Posts proposed negatives for ✅ approval.</div>
+    </div>
+  </div>
+
+  <h3>Cron Setup Commands</h3>
+  <div class="code-block">
+    <div class="code-header"><span class="code-label">openclaw cron commands — run after Cleo is live</span><button class="copy-btn" onclick="copyCode(this)">Copy</button></div>
+    <pre><span class="cmt"># Weekly growth report — Monday 8AM Madrid (7AM UTC)</span>
+openclaw cron add --name "Weekly Growth Report" \
+  --schedule "0 7 * * 1" \
+  --payload '{"kind":"agentTurn","message":"Run the weekly Google Ads report for Candosa. Pull last 7 days data, calculate ROAS and CAC, identify top/bottom campaigns, generate optimization recommendations, post full report to Slack #paid-traffic.","timeoutSeconds":300}' \
+  --session isolated
+
+<span class="cmt"># Daily anomaly check — 9AM Madrid (8AM UTC)</span>
+openclaw cron add --name "Daily Anomaly Check" \
+  --schedule "0 8 * * *" \
+  --payload '{"kind":"agentTurn","message":"Run the daily Google Ads anomaly check for Candosa. Only post to Slack if anomalies detected (spend spike >30%, ROAS <2.0, CTR drop >40%). Silent if everything normal.","timeoutSeconds":120}' \
+  --session isolated
+
+<span class="cmt"># Offline conversion import — Monday 7AM Madrid (6AM UTC)</span>
+openclaw cron add --name "Offline Conversion Import" \
+  --schedule "0 6 * * 1" \
+  --payload '{"kind":"agentTurn","message":"Pull last weeks Stripe payment data, match GCLIDs, upload offline conversions to Google Ads. Log results to Slack #paid-traffic.","timeoutSeconds":180}' \
+  --session isolated
+
+<span class="cmt"># Weekly search terms review — Friday 5PM Madrid (4PM UTC)</span>
+openclaw cron add --name "Search Terms Review" \
+  --schedule "0 16 * * 5" \
+  --payload '{"kind":"agentTurn","message":"Pull Google Ads search terms report for all Candosa campaigns. Identify irrelevant queries, propose negative keywords, post to Slack #paid-traffic with approval buttons.","timeoutSeconds":180}' \
+  --session isolated</pre>
+  </div>
+</section>
+
+<!-- LLM STRATEGY -->
+<section id="llm">
+  <h2><span class="step-num">8</span> LLM Strategy</h2>
+  <p class="section-intro">Which model for which task — optimized for cost and quality.</p>
+
+  <table>
+    <tr><th>Task</th><th>Model</th><th>Why</th><th>Est. cost</th></tr>
+    <tr><td>Team conversations, Q&A</td><td>Claude Sonnet 4</td><td>Best reasoning for complex questions</td><td>~€0.05/interaction</td></tr>
+    <tr><td>Weekly growth report generation</td><td>Claude Sonnet 4</td><td>Needs analysis + synthesis</td><td>~€0.20/report</td></tr>
+    <tr><td>Anomaly detection (data-only)</td><td>Gemini 2.0 Flash</td><td>Cheap, fast, handles large data</td><td>~€0.01/check</td></tr>
+    <tr><td>Search terms classification</td><td>Gemini 2.0 Flash</td><td>High volume, repetitive task</td><td>~€0.02/batch</td></tr>
+    <tr><td>Ad copy generation</td><td>Claude Sonnet 4</td><td>Best Spanish copy quality</td><td>~€0.05/batch</td></tr>
+    <tr><td>Strategy recommendations</td><td>Claude Sonnet 4</td><td>Needs business context + reasoning</td><td>~€0.10/recommendation</td></tr>
+    <tr style="font-weight:700"><td>Total estimated monthly</td><td>—</td><td>—</td><td>€50-150/month</td></tr>
+  </table>
+
+  <div class="callout blue">
+    <p>💡 Set <code>model: google/gemini-2.0-flash</code> on data-heavy cron jobs to cut costs significantly. Use Claude Sonnet only for reasoning tasks and team interactions.</p>
+  </div>
+</section>
+
+<!-- LAUNCH PLAN -->
+<section id="launch">
+  <h2><span class="step-num">9</span> Launch Plan</h2>
+  <p class="section-intro">Step-by-step from zero to fully operational. Estimated total time: 4-6 hours.</p>
+
+  <table>
+    <tr><th>Phase</th><th>Tasks</th><th>Time</th><th>Owner</th></tr>
+    <tr>
+      <td><strong>Phase 1</strong><br>Infrastructure</td>
+      <td>Provision Hetzner VPS · Install OpenClaw + dependencies · Set up systemd service</td>
+      <td>45 min</td>
+      <td>JClaw or JC</td>
+    </tr>
+    <tr>
+      <td><strong>Phase 2</strong><br>Config</td>
+      <td>Write config.yaml · Set SOUL.md + USER.md · Transfer paid-traffic skill from JClaw</td>
+      <td>30 min</td>
+      <td>JClaw</td>
+    </tr>
+    <tr>
+      <td><strong>Phase 3</strong><br>Slack</td>
+      <td>Create Slack app · Enable Socket Mode · Get team IDs · Add to channels · Test @Cleo mention</td>
+      <td>30 min</td>
+      <td>Head of Growth</td>
+    </tr>
+    <tr>
+      <td><strong>Phase 4</strong><br>Credentials</td>
+      <td>Wire Google Ads OAuth · Set up gog auth for candosa accounts · Add Stripe API key</td>
+      <td>45 min</td>
+      <td>JClaw</td>
+    </tr>
+    <tr>
+      <td><strong>Phase 5</strong><br>Crons</td>
+      <td>Set up all scheduled cron jobs · Test each one manually · Verify Slack posting works</td>
+      <td>30 min</td>
+      <td>JClaw</td>
+    </tr>
+    <tr>
+      <td><strong>Phase 6</strong><br>Conversion tracking</td>
+      <td>GCLID capture on landing pages · Stripe webhook handler · GCLID→CRM storage · Test import</td>
+      <td>2-3 hours</td>
+      <td>Dev team</td>
+    </tr>
+    <tr>
+      <td><strong>Phase 7</strong><br>Go live</td>
+      <td>Enable Candosa | Alta Autónomo at €200/day · Monitor daily for 7 days · Let Cleo report</td>
+      <td>Ongoing</td>
+      <td>Head of Growth</td>
+    </tr>
+  </table>
+
+  <h3>Definition of Done</h3>
+  <div class="card-grid">
+    <div class="card highlight">
+      <div class="card-icon">✅</div>
+      <h4>Cleo answers @mentions in Slack</h4>
+      <p>Team can ask any question and get a data-backed answer within 30 seconds.</p>
+    </div>
+    <div class="card highlight">
+      <div class="card-icon">✅</div>
+      <h4>Weekly report posts automatically</h4>
+      <p>Every Monday at 8AM — no one has to ask for it.</p>
+    </div>
+    <div class="card highlight">
+      <div class="card-icon">✅</div>
+      <h4>Recommendations are executable</h4>
+      <p>Team reacts ✅ and Cleo executes in Google Ads — no UI needed.</p>
+    </div>
+    <div class="card highlight">
+      <div class="card-icon">✅</div>
+      <h4>Offline conversions flowing</h4>
+      <p>Stripe → GCLID → Google Ads. True ROAS visible in dashboard.</p>
+    </div>
+  </div>
+
+  <div style="margin-top: 32px; text-align: center;">
+    <button class="download-btn" onclick="downloadSpec()">⬇️ Download Full Spec (JSON)</button>
+    <button class="download-btn secondary" onclick="window.print()">🖨️ Print / Save as PDF</button>
+  </div>
+</section>
+
+</div>
+
+<footer>
+  Candosa Growth Agent Build Spec · Prepared by JClaw · April 2026<br>
+  Questions → #📣-paid-traffic on Discord or @JClaw
+</footer>
+
+<script>
+function copyCode(btn) {
+  const pre = btn.closest('.code-block').querySelector('pre');
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(() => { btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function downloadSpec() {
+  const spec = {
+    name: "Candosa Growth Agent (Cleo)",
+    version: "1.0",
+    created: "2026-04-09",
+    infrastructure: {
+      provider: "Hetzner",
+      plan: "CX22",
+      os: "Ubuntu 24.04",
+      cost_eur_month: 4.5,
+      location: "Falkenstein (EU)"
+    },
+    runtime: { agent: "OpenClaw v0.12+", model_primary: "anthropic/claude-sonnet-4-6", model_data: "google/gemini-2.0-flash" },
+    channels: ["slack"],
+    slack_channels: ["#growth-ai", "#paid-traffic"],
+    integrations: ["google_ads_api", "meta_ads_api", "stripe", "google_analytics_4", "google_sheets", "google_docs"],
+    skills: ["paid-traffic", "conversion-tracking", "meta-ads", "seo-monitor", "landing-pages", "growth-report"],
+    crons: [
+      { name: "Weekly Growth Report", schedule: "0 7 * * 1", tz: "UTC (8AM Madrid)" },
+      { name: "Daily Anomaly Check", schedule: "0 8 * * *", tz: "UTC (9AM Madrid)" },
+      { name: "Offline Conversion Import", schedule: "0 6 * * 1", tz: "UTC (7AM Madrid)" },
+      { name: "Search Terms Review", schedule: "0 16 * * 5", tz: "UTC (5PM Madrid)" }
+    ],
+    authorized_users: ["JC Glancy", "Head of Growth", "Jesús", "Alejandro"],
+    google_ads: { customer_id: "4971231790", mcc: "523-368-4919", campaigns: 4, status: "PAUSED" },
+    estimated_monthly_cost_eur: { infrastructure: 4.5, llm: "50-150", total: "55-155" }
+  };
+  const blob = new Blob([JSON.stringify(spec, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'candosa-growth-agent-spec.json';
+  a.click();
+}
+
+// Active nav on scroll
+const sections = document.querySelectorAll('section[id]');
+const navLinks = document.querySelectorAll('nav a[href^="#"]');
+window.addEventListener('scroll', () => {
+  let current = '';
+  sections.forEach(s => { if (window.scrollY >= s.offsetTop - 100) current = s.id; });
+  navLinks.forEach(a => { a.classList.toggle('active', a.getAttribute('href') === '#' + current); });
+});
+</script>
+</body>
+</html>
